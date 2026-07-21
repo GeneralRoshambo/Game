@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Card Crawl: Wyrd Deck</title>
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- TITLE SCREEN -->
+  <section id="screen-title" class="screen active">
+    <div class="title-wrap">
+      <h1>WYRD DECK<span class="sub">a card-battler roguelite</span></h1>
+      <p class="best-line" id="best-line">Best stage reached: 1</p>
+      <button class="btn btn-lg" id="btn-start">Start Run</button>
+      <label class="settings-row">
+        <input type="checkbox" id="chk-reduce-motion" />
+        Reduce motion effects
+      </label>
+      <p class="hint">A real 52-card deck. Build poker hands. Slay fantasy foes.</p>
+    </div>
+  </section>
+
+  <!-- MAP SCREEN -->
+  <section id="screen-map" class="screen">
+    <header class="topbar">
+      <div class="hp-pill" id="map-hp"></div>
+      <div class="stage-pill" id="map-stage"></div>
+    </header>
+    <div class="map-wrap" id="map-nodes"></div>
+  </section>
+
+  <!-- BATTLE SCREEN -->
+  <section id="screen-battle" class="screen">
+    <header class="topbar">
+      <div class="hp-pill" id="battle-player-hp"></div>
+      <div class="turn-pill" id="battle-turn"></div>
+    </header>
+
+    <div class="enemy-row" id="enemy-row"></div>
+
+    <div class="hand-info">
+      <div id="hand-preview" class="hand-preview">Select cards to form a poker hand</div>
+    </div>
+
+    <div class="hand-wrap">
+      <div class="hand" id="player-hand"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn" id="btn-clear">Clear</button>
+      <button class="btn btn-primary" id="btn-play">Play Hand</button>
+    </div>
+  </section>
+
+  <!-- EVENT / SHOP SCREEN -->
+  <section id="screen-event" class="screen">
+    <div class="panel-wrap">
+      <h2 id="event-title">A Wandering Trader</h2>
+      <p id="event-desc" class="event-desc"></p>
+      <div class="choice-row" id="event-choices"></div>
+    </div>
+  </section>
+
+  <!-- REWARD SCREEN -->
+  <section id="screen-reward" class="screen">
+    <div class="panel-wrap">
+      <h2>Victory! Choose a Reward</h2>
+      <div class="choice-row" id="reward-choices"></div>
+      <button class="btn" id="btn-skip-reward">Skip</button>
+    </div>
+  </section>
+
+  <!-- END SCREEN -->
+  <section id="screen-end" class="screen">
+    <div class="title-wrap">
+      <h1 id="end-title">Run Over</h1>
+      <p id="end-desc" class="hint"></p>
+      <button class="btn btn-lg" id="btn-restart">Play Again</button>
+    </div>
+  </section>
+
+  <!-- PAUSE OVERLAY -->
+  <div id="pause-overlay">
+    <div class="pause-box">Paused</div>
+  </div>
+
+</div>
+
+<!--
+  YouTube Playables SDK.
+  Loaded defensively: the game runs fully offline/local if this script is
+  absent or fails (see the ytgame safe-wrapper in js/game.js).
+  NOTE: verify this <script src> against the current official YouTube
+  Playables documentation before publishing; the exact CDN path can change.
+-->
+<script src="https://www.gstatic.com/promo/ytgame/ytgame-jssdk.js"></script>
+<script src="./js/game.js"></script>
+</body>
+</html>
