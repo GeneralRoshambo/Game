@@ -16,6 +16,7 @@
       <p class="best-line" id="best-line"></p>
       <button class="btn btn-lg" id="btn-start">Start Run</button>
       <button class="btn" id="btn-deckbuilder">Deck &amp; Cards</button>
+      <button class="btn" id="btn-rules">Rules</button>
       <p class="hint">40-card decks. 3x3 tactical battlefield. Rank beats Rank. Shields are your life.</p>
     </div>
   </section>
@@ -55,6 +56,61 @@
     </div>
   </section>
 
+  <!-- RULES -->
+  <section id="screen-rules" class="screen">
+    <div class="rules-wrap">
+      <h2>How to Play</h2>
+
+      <h3>The Board</h3>
+      <p>The battlefield is a 3x3 grid: three lanes (left, center, right), each three cells deep — your home row, a
+      neutral middle row, and the enemy's home row (and vice versa for them). Creatures deploy into your home row
+      and can move <b>Left</b>, <b>Right</b>, <b>Advance</b>, or <b>Retreat</b> — one step per turn.</p>
+
+      <h3>Combat</h3>
+      <p>A creature can fight whatever enemy creature is directly adjacent to it (one row up or down, same lane).
+      Whoever has the higher Rank wins; the loser is destroyed. Equal Ranks destroy <i>both</i>.</p>
+
+      <h3>Attacking the Player — Center Lane Only</h3>
+      <p>The side lanes (left and right) are skirmish lanes: creatures there can only ever fight other creatures,
+      never the enemy player directly. Only the <b>center lane</b> leads to a Shield — a creature that fully
+      advances through the center lane with nothing left to fight lands a direct hit on the enemy's Shields.
+      The <span class="marker-icon">🧍</span>/<span class="marker-icon">👹</span> markers above and below the
+      board show whose end is whose.</p>
+
+      <h3>Shields (Your Life)</h3>
+      <p>Each player starts with 3 face-down Shields. A direct hit destroys one Shield (it's discarded, and if it
+      has a simple triggered ability, that resolves as a "Shield Trigger"). Take a direct hit with <b>zero</b>
+      Shields left and you immediately lose.</p>
+
+      <h3>Mana</h3>
+      <p>There is one mana pool. You gain +2 mana at the start of every turn, and unused mana always carries over —
+      it's never lost. Creatures of a suit you already control get cheaper (up to -2) the more of that suit you
+      have in play — specializing in a suit pays off.</p>
+
+      <h3>Card Types</h3>
+      <p><b>Creatures</b> occupy a board slot and usually trigger an ability when summoned. <b>Spells</b> resolve
+      immediately and go to the discard pile. <b>Equipment</b> attaches to one of your creatures, giving it +1
+      Rank permanently plus its own ability.</p>
+
+      <h3>Turn Order</h3>
+      <p>Gain mana &rarr; draw a card &rarr; play creatures/spells/equipment and move/attack with your creatures,
+      in any order, as many times as your mana and movement allow &rarr; End Turn.</p>
+
+      <h3>Deckbuilding</h3>
+      <p>Decks are exactly 40 cards, max 4 copies of any one card. Use the Deck &amp; Cards screen to adjust your
+      deck between runs, and the Card Creator to design your own cards — pick a suit, a rank (which sets the mana
+      cost), and up to 3 abilities from that suit's list.</p>
+
+      <h3>Suit Identities</h3>
+      <p><b>♥ Hearts</b> — healing, protection, revival, support.<br>
+      <b>♣ Clubs</b> — aggression, poison, board control.<br>
+      <b>♦ Diamonds</b> — economy, tokens, buffing, card advantage.<br>
+      <b>♠ Spades</b> — removal, control, sacrifice.</p>
+
+      <button class="btn btn-lg" id="btn-rules-back">Back</button>
+    </div>
+  </section>
+
   <!-- MAP -->
   <section id="screen-map" class="screen">
     <header class="topbar">
@@ -71,8 +127,13 @@
       <div class="pill" id="battle-player-status"></div>
     </header>
 
-    <div class="battlefield" id="battlefield-enemy"></div>
-    <div class="battlefield" id="battlefield-player"></div>
+    <div class="board-3x3">
+      <div class="marker enemy-marker"><span class="marker-icon">👹</span><span class="marker-label">Enemy</span></div>
+      <div class="battlefield" id="battlefield-enemy"></div>
+      <div class="battlefield battlefield-mid" id="battlefield-mid"></div>
+      <div class="battlefield" id="battlefield-player"></div>
+      <div class="marker player-marker"><span class="marker-icon">🧍</span><span class="marker-label">You</span></div>
+    </div>
 
     <div class="action-panel" id="action-panel"></div>
 

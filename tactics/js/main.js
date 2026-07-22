@@ -230,6 +230,8 @@ function showEnd(win) {
 function wireStaticButtons() {
   $('#btn-start').addEventListener('click', () => startRun());
   $('#btn-deckbuilder').addEventListener('click', () => showDeckbuilder());
+  $('#btn-rules').addEventListener('click', () => switchScreen('rules'));
+  $('#btn-rules-back').addEventListener('click', () => switchScreen('title'));
   $('#btn-skip-reward').addEventListener('click', () => proceedAfterNode());
   $('#btn-restart').addEventListener('click', () => { switchScreen('title'); renderTitle(); });
 }

@@ -10,6 +10,16 @@ import { ABILITY_INFO, resolveAbility, abilityTargetType } from './abilities.js'
 const EQUIPMENT_RANK_BONUS = 1;
 const OPENING_HAND_SIZE = 5;
 
+// The board is a true 3x3 grid: each side's home row, plus a neutral middle
+// row between them. ROW_SEQUENCE gives the path a creature walks from its
+// owner's home row, through the middle, into the opponent's home row.
+// PHYSICAL_NEIGHBORS gives simple up/down adjacency for combat, independent
+// of who owns what (needed because Steal/invasion can put a creature in a
+// row it doesn't "belong" to).
+const ROW_SEQUENCE = { player: ['bottom', 'mid', 'top'], enemy: ['top', 'mid', 'bottom'] };
+const PHYSICAL_NEIGHBORS = { top: ['mid'], mid: ['top', 'bottom'], bottom: ['mid'] };
+const CENTER_COLUMN = 1;
+
 // Abilities safe to auto-resolve straight off a flipped Shield card: no
 // board target and no self-status flag to attach (there's no board slot to
 // attach it to — the card was never played).
@@ -21,7 +31,7 @@ export class BattleEngine {
       player: this.freshSide(playerDeck),
       enemy: this.freshSide(enemyDeck),
     };
-    this.rows = { top: [null, null, null], bottom: [null, null, null] };
+    this.rows = { top: [null, null, null], mid: [null, null, null], bottom: [null, null, null] };
     this.active = 'player';
     this.winner = null;
     this.log_ = [];
@@ -64,9 +74,14 @@ export class BattleEngine {
   rankValue(card) { return RANK_VALUE[card.rank]; }
   rankOf(row, index) { const c = this.rows[row][index]; return c ? Math.max(1, effectiveRank(c)) : 0; }
 
+  // Row one step toward the opponent / back toward home, for this owner's
+  // path (home -> mid -> opponent-home). Null if already at that end.
+  forwardRowOf(owner, row) { const seq = ROW_SEQUENCE[owner]; const at = seq.indexOf(row); return at < seq.length - 1 ? seq[at + 1] : null; }
+  backwardRowOf(owner, row) { const seq = ROW_SEQUENCE[owner]; const at = seq.indexOf(row); return at > 0 ? seq[at - 1] : null; }
+
   // ---------------------------------------------------------------- Board
   findCreature(uid) {
-    for (const row of ['top', 'bottom']) {
+    for (const row of ['top', 'mid', 'bottom']) {
       for (let i = 0; i < 3; i++) if (this.rows[row][i] && this.rows[row][i].uid === uid) return { row, index: i };
     }
     return null;
@@ -81,7 +96,7 @@ export class BattleEngine {
 
   ownedCreatures(side) {
     const out = [];
-    for (const row of ['top', 'bottom']) for (let i = 0; i < 3; i++) {
+    for (const row of ['top', 'mid', 'bottom']) for (let i = 0; i < 3; i++) {
       const c = this.rows[row][i];
       if (c && c.owner === side) out.push({ row, index: i, creature: c });
     }
@@ -258,9 +273,6 @@ export class BattleEngine {
     if (c.statuses.fortified) return { ok: false, reason: 'Fortified: cannot move.' };
     if (c.statuses.rooted) return { ok: false, reason: 'Rooted: cannot move.' };
 
-    const home = this.homeRow(c.owner);
-    const other = home === 'top' ? 'bottom' : 'top';
-
     if (direction === 'left' || direction === 'right') {
       const dest = direction === 'left' ? index - 1 : index + 1;
       if (dest < 0 || dest > 2) return { ok: false, reason: 'Off the battlefield.' };
@@ -269,18 +281,25 @@ export class BattleEngine {
       c.movedThisTurn = true;
       return { ok: true };
     }
+
+    // Forward/backward walk the owner's path: home row -> middle row ->
+    // opponent's home row (and back again).
+    const seq = ROW_SEQUENCE[c.owner];
+    const at = seq.indexOf(row);
     if (direction === 'forward') {
-      if (row !== home) return { ok: false, reason: 'Already advanced.' };
-      if (this.rows[other][index]) return { ok: false, reason: 'Blocked by a creature.' };
-      this.rows[other][index] = c; this.rows[row][index] = null;
+      if (at >= seq.length - 1) return { ok: false, reason: 'Already fully advanced.' };
+      const dest = seq[at + 1];
+      if (this.rows[dest][index]) return { ok: false, reason: 'Blocked by a creature.' };
+      this.rows[dest][index] = c; this.rows[row][index] = null;
       c.movedThisTurn = true;
-      this.log(`${c.name} advances into enemy territory!`);
+      if (at + 1 === seq.length - 1) this.log(`${c.name} advances into enemy territory!`);
       return { ok: true };
     }
     if (direction === 'backward') {
-      if (row === home) return { ok: false, reason: 'Nowhere to retreat to.' };
-      if (this.rows[home][index]) return { ok: false, reason: 'Slot occupied.' };
-      this.rows[home][index] = c; this.rows[row][index] = null;
+      if (at <= 0) return { ok: false, reason: 'Nowhere to retreat to.' };
+      const dest = seq[at - 1];
+      if (this.rows[dest][index]) return { ok: false, reason: 'Slot occupied.' };
+      this.rows[dest][index] = c; this.rows[row][index] = null;
       c.movedThisTurn = true;
       return { ok: true };
     }
@@ -288,15 +307,20 @@ export class BattleEngine {
   }
 
   // --------------------------------------------------------------- Combat
+  // A creature can fight whatever enemy creature is physically adjacent
+  // (one row up or down, same column) regardless of who "should" be there.
+  // Only once fully advanced into the opponent's home row, in the CENTER
+  // column, with nothing left to fight, can it hit the opponent directly —
+  // the side lanes are skirmish-only and never reach the Shields.
   getAdjacentTarget(creature, row, index) {
-    const home = this.homeRow(creature.owner);
-    if (row === home) {
-      const oppRow = home === 'top' ? 'bottom' : 'top';
-      const oppSlot = this.rows[oppRow][index];
-      if (oppSlot && oppSlot.owner !== creature.owner) return { kind: 'creature', row: oppRow, index };
-      return { kind: 'none' };
+    for (const nRow of PHYSICAL_NEIGHBORS[row]) {
+      const slot = this.rows[nRow][index];
+      if (slot && slot.owner !== creature.owner) return { kind: 'creature', row: nRow, index };
     }
-    return { kind: 'direct' };
+    const seq = ROW_SEQUENCE[creature.owner];
+    const fullyAdvanced = row === seq[seq.length - 1];
+    if (fullyAdvanced && index === CENTER_COLUMN) return { kind: 'direct' };
+    return { kind: 'none' };
   }
 
   attackCreature(row, index) {
@@ -343,10 +367,11 @@ export class BattleEngine {
   }
 
   forceCombatAgainstAdjacent(casterSide, targetRow, targetIndex) {
-    const oppRow = targetRow === 'top' ? 'bottom' : 'top';
-    const facing = this.rows[oppRow][targetIndex];
-    if (facing && facing.owner === casterSide) this.resolveCombat(oppRow, targetIndex, targetRow, targetIndex);
-    else this.log('Provoke fizzled: no adjacent creature.');
+    for (const nRow of PHYSICAL_NEIGHBORS[targetRow]) {
+      const facing = this.rows[nRow][targetIndex];
+      if (facing && facing.owner === casterSide) { this.resolveCombat(nRow, targetIndex, targetRow, targetIndex); return; }
+    }
+    this.log('Provoke fizzled: no adjacent creature.');
   }
 
   // ------------------------------------------------------------ Shields

@@ -19,6 +19,7 @@ export function mountBattleUI() {
   if (mounted) return;
   mounted = true;
   $('#battlefield-enemy').addEventListener('click', (e) => handleSlotClick(e, 'top'));
+  $('#battlefield-mid').addEventListener('click', (e) => handleSlotClick(e, 'mid'));
   $('#battlefield-player').addEventListener('click', (e) => handleSlotClick(e, 'bottom'));
   $('#player-hand').addEventListener('click', handleHandClick);
   $('#btn-end-turn').addEventListener('click', handleEndTurn);
@@ -136,6 +137,7 @@ function renderAll() {
   if (!engine) return;
   renderStatusPills();
   renderBoard('top', 'battlefield-enemy');
+  renderBoard('mid', 'battlefield-mid');
   renderBoard('bottom', 'battlefield-player');
   renderActionPanel();
   renderHand();
@@ -222,13 +224,14 @@ function renderActionPanel() {
   if (!loc) { selectedUid = null; return; }
   const { row, index } = loc;
   const c = engine.rows[row][index];
-  const home = engine.homeRow('player');
 
   const canMove = !c.movedThisTurn && !c.statuses.fortified && !c.statuses.rooted;
   const leftOk = canMove && index > 0 && !engine.rows[row][index - 1];
   const rightOk = canMove && index < 2 && !engine.rows[row][index + 1];
-  const fwdOk = canMove && row === home && !engine.rows[row === 'top' ? 'bottom' : 'top'][index];
-  const backOk = canMove && row !== home && !engine.rows[home][index];
+  const fwdRow = engine.forwardRowOf(c.owner, row);
+  const backRow = engine.backwardRowOf(c.owner, row);
+  const fwdOk = canMove && fwdRow && !engine.rows[fwdRow][index];
+  const backOk = canMove && backRow && !engine.rows[backRow][index];
 
   const allowedAtk = c.statuses.multiAttack ? 2 : 1;
   const target = engine.getAdjacentTarget(c, row, index);
