@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Rank &amp; Ruin</title>
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- TITLE -->
+  <section id="screen-title" class="screen active">
+    <div class="title-wrap">
+      <h1>RANK &amp; RUIN<span class="sub">a tactical card duel roguelite</span></h1>
+      <p class="best-line" id="best-line"></p>
+      <button class="btn btn-lg" id="btn-start">Start Run</button>
+      <button class="btn" id="btn-deckbuilder">Deck &amp; Cards</button>
+      <p class="hint">40-card decks. 3x3 tactical battlefield. Rank beats Rank. Shields are your life.</p>
+    </div>
+  </section>
+
+  <!-- DECKBUILDER -->
+  <section id="screen-deckbuilder" class="screen">
+    <header class="topbar">
+      <div class="pill" id="deck-count-pill"></div>
+      <button class="btn" id="btn-create-card">+ Create Card</button>
+    </header>
+    <div class="deck-list" id="deck-list"></div>
+    <div class="action-row">
+      <button class="btn" id="btn-deck-back">Back</button>
+      <button class="btn btn-primary" id="btn-deck-save">Save Deck</button>
+    </div>
+  </section>
+
+  <!-- CARD CREATOR -->
+  <section id="screen-creator" class="screen">
+    <div class="panel-wrap creator-wrap">
+      <h2>Create a Card</h2>
+      <label class="field">Name<input type="text" id="cc-name" maxlength="24" placeholder="Card name" /></label>
+      <label class="field">Type
+        <select id="cc-type"><option value="creature">Creature</option><option value="spell">Spell</option><option value="equipment">Equipment</option></select>
+      </label>
+      <div class="field-row">
+        <label class="field">Suit<select id="cc-suit"></select></label>
+        <label class="field">Rank<select id="cc-rank"></select></label>
+      </div>
+      <div class="pill" id="cc-cost-pill"></div>
+      <div class="cc-abilities" id="cc-abilities"></div>
+      <label class="field">Flavor Text<input type="text" id="cc-flavor" maxlength="60" placeholder="Optional" /></label>
+      <div class="action-row">
+        <button class="btn" id="btn-creator-cancel">Cancel</button>
+        <button class="btn btn-primary" id="btn-creator-save">Save Card</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section id="screen-map" class="screen">
+    <header class="topbar">
+      <div class="pill" id="map-stage"></div>
+    </header>
+    <div class="map-wrap" id="map-nodes"></div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="screen-battle" class="screen">
+    <header class="topbar">
+      <div class="pill" id="battle-enemy-status"></div>
+      <div class="pill" id="battle-turn"></div>
+      <div class="pill" id="battle-player-status"></div>
+    </header>
+
+    <div class="battlefield" id="battlefield-enemy"></div>
+    <div class="battlefield" id="battlefield-player"></div>
+
+    <div class="action-panel" id="action-panel"></div>
+
+    <div class="hand-wrap"><div class="hand" id="player-hand"></div></div>
+
+    <div class="action-row">
+      <button class="btn" id="btn-cancel-action">Cancel</button>
+      <button class="btn btn-primary" id="btn-end-turn">End Turn</button>
+    </div>
+
+    <div class="log-panel" id="log-panel"></div>
+  </section>
+
+  <!-- EVENT / SHOP -->
+  <section id="screen-event" class="screen">
+    <div class="panel-wrap">
+      <h2 id="event-title">Wandering Merchant</h2>
+      <p class="event-desc" id="event-desc"></p>
+      <div class="choice-row" id="event-choices"></div>
+    </div>
+  </section>
+
+  <!-- REWARD -->
+  <section id="screen-reward" class="screen">
+    <div class="panel-wrap">
+      <h2>Victory! Choose a Reward</h2>
+      <div class="choice-row" id="reward-choices"></div>
+      <button class="btn" id="btn-skip-reward">Skip</button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="screen-end" class="screen">
+    <div class="title-wrap">
+      <h1 id="end-title">Run Over</h1>
+      <p class="hint" id="end-desc"></p>
+      <button class="btn btn-lg" id="btn-restart">Back to Title</button>
+    </div>
+  </section>
+
+  <!-- TARGETING OVERLAY -->
+  <div id="target-overlay">
+    <div class="target-box">
+      <div class="target-title" id="target-title">Choose a target</div>
+      <div class="target-list" id="target-list"></div>
+      <button class="btn" id="btn-target-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <div id="pause-overlay"><div class="pause-box">Paused</div></div>
+</div>
+
+<!--
+  YouTube Playables SDK. Loaded defensively: the game runs fully offline if
+  this script is absent or fails (see the ytgame safe-wrapper in js/main.js).
+  NOTE: verify this <script src> against current YouTube Playables docs
+  before publishing — the exact CDN path can change.
+-->
+<script src="https://www.gstatic.com/promo/ytgame/ytgame-jssdk.js"></script>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
